@@ -6,8 +6,9 @@
 LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
 int i,j, col;
 char cprob[]="ENTA#CPROB";
-char feliz[]="Feliz";
-char natal[]="Natal";
+char aguarde[]="Aguarde...";
+char amazingrov[]="AmazingROV";
+char TEXTO[]="TEXTO";
 char bom[]="BOM";
 char ano[]="ANO";
 char novo[]="NOVO";
@@ -16,15 +17,37 @@ char votos[]="Sao os votos do";
 void setup() {
   Serial.begin(9600);
   lcd.begin(16,2);
+
+  //faz o texto amazingrov
+    col=3;
+    for(j=0;j<=9;j++){
+      lcd.setCursor(col,0);
+      lcd.print(amazingrov[j]);
+      delay(200);
+      col++;
+    }
+   //faz o texto aguarde por favor.
+   col=4;
+   for(j=0;j<=9;j++) {
+    lcd.setCursor(col, 1);
+    lcd.print(aguarde[j]);
+    delay(100);
+    col++;
+   }
+
+   delay(5000);
+   limpaLinha(1);
+   
 }
 
-void loop() {
 
-    //faz feliz natal
-    col=2;
-    for(j=0;j<=4;j++){
+void loop() {
+    /*
+    //faz o texto aguarde. 
+    col=3;
+    for(j=0;j<=10;j++){
       lcd.setCursor(col,0);
-      lcd.print(feliz[j]);
+      lcd.print(amaizingrov[j]);
       delay(50);
       col++;
 
@@ -32,7 +55,7 @@ void loop() {
     col++;
     for(j=0;j<=4;j++){
       lcd.setCursor(col,0);
-      lcd.print(natal[j]);
+      lcd.print(TEXTO[j]);
       delay(50);
       col++;
     }
@@ -62,7 +85,6 @@ void loop() {
       col--;
     }
     delay(3000);
-    lcd.clear();
     delay(500);
 
     //faz entacprob
@@ -92,6 +114,13 @@ void loop() {
       delay(100);
     }
     delay(3000);
-    lcd.clear();
     delay(500);
+    */
+}
+
+void limpaLinha(int linha){
+  for(j=0;j<=15;j++){
+    lcd.setCursor(j,linha);
+    lcd.print(" ");
+  }
 }

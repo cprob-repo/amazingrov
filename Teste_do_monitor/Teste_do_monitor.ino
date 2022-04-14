@@ -6,10 +6,11 @@
 SoftwareSerial apc220T(6,7); //apc220 transmit
 SoftwareSerial apc220R(8,9); //apc220 receive
 LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
-
 int i,j, col;
-char aguarde[]="Aguarde...";
-char amazingrov[]="AmazingROV";
+char cprob[]="ENTA#CPROB";
+char feliz[]="AMAIZING";
+char natal[]="ROV";
+
 unsigned long previousMillis = 0;
 unsigned long currentMillis = 0;
 const long interval = 250;
@@ -22,34 +23,6 @@ void setup()
   digitalWrite(4, HIGH);
   apc220T.begin(9600);
   apc220R.begin(9600);
-  lcd.begin(16,2);
-
-  //faz o texto amazingrov
-    col=3;
-    for(j=0;j<=9;j++){
-      lcd.setCursor(col,0);
-      lcd.print(amazingrov[j]);
-      delay(200);
-      col++;
-    }
-   //faz o texto aguarde por favor.
-   col=4;
-   for(j=0;j<=9;j++) {
-    lcd.setCursor(col, 1);
-    lcd.print(aguarde[j]);
-    delay(100);
-    col++;
-   }
-
-   delay(5000);
-   limpaLinha(1);
-   
-}
-void limpaLinha(int linha){
-  for(j=0;j<=15;j++){
-    lcd.setCursor(j,linha);
-    lcd.print(" ");
-  }
 }
 
 void loop() 
@@ -158,8 +131,7 @@ void loop()
    }
   }
  }
-
-  //ler dados recebidos
+  
   while(apc220R.available()){
     char c = apc220R.read();
     if(c!='\n'){
@@ -171,3 +143,28 @@ void loop()
   }
   temp="";
 }
+
+void setup() {
+  Serial.begin(9600);
+  lcd.begin(16,2);
+}
+
+void loop() {
+
+    //faz feliz natal
+    col=2;
+    for(j=0;j<=4;j++){
+      lcd.setCursor(col,0);
+      lcd.print(feliz[j]);
+      delay(50);
+      col++;
+
+    }
+    col++;
+    for(j=0;j<=4;j++){
+      lcd.setCursor(col,0);
+      lcd.print(natal[j]);
+      delay(50);
+      col++;
+    }
+    lcd.print("!");
