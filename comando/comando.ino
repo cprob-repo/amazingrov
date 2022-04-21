@@ -10,6 +10,9 @@ LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
 int i,j, col;
 char aguarde[]="Aguarde...";
 char amazingrov[]="AmazingROV";
+char recebendo[]="Recebendo";
+char sem_dados[]="Sem dados";
+
 unsigned long previousMillis = 0;
 unsigned long currentMillis = 0;
 const long interval = 250;
@@ -43,7 +46,6 @@ void setup()
 
    delay(5000);
    limpaLinha(1);
-   
 }
 void limpaLinha(int linha){
   for(j=0;j<=15;j++){
@@ -164,10 +166,16 @@ void loop()
     char c = apc220R.read();
     if(c!='\n'){
       temp = temp + c;
+      lcd.setCursor(1,1);
+      lcd.print("Recebendo dados");
     }
     else {
       Serial.println("Recebido: " + temp);
+      limpaLinha(1);
+      lcd.setCursor(4,1);
+      lcd.print("Sem dados");
+      }
+      
     }
+    temp="";
   }
-  temp="";
-}
