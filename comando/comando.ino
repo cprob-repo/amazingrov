@@ -170,7 +170,7 @@ void loop()
       lcd.print("Recebendo dados");
     }
     else {
-      Serial.println("Recebido: " + temp);
+      Serial.println(temp);
       limpaLinha(1);
       lcd.setCursor(4,1);
       lcd.print("Sem dados");
