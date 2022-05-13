@@ -4,13 +4,16 @@
 #include <SPI.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
+#include <Adafruit_GPS.h>
 #include <SoftwareSerial.h>
+
+#define GPSECHO  false
 
 #define MA_IN1 6
 #define MA_IN2 7
 #define MA_EN1 3
 
-#define MB_IN3 8
+#define MB_IN3 14
 #define MB_IN4 13
 #define MB_EN2 9
 
@@ -25,7 +28,6 @@
 #define ONE_WIRE_BUS 22
 
 OneWire oneWire(ONE_WIRE_BUS);
-
 DallasTemperature sensors(&oneWire);
 
 float tempH2O = 0;
@@ -38,13 +40,30 @@ const long interval = 1000;
 
 Adafruit_BME280 bme;
 SoftwareSerial apc220T(2,4);
+SoftwareSerial mySerial(51,52);
+Adafruit_GPS GPS(&mySerial);
 
-//int contador = 0;
-
+boolean usingInterrupt = false;
+float lat, lon, sec_lat, sec_lon, dec_lat, dec_lon;
+String s_dec_lat, s_dec_lon;
+int rate, deg_lat, deg_lon, minu_lat, minu_lon;
+uint32_t timer = millis();
 String data = "";
 
 void setup()
 {
+  Serial.begin(9600); 
+  rate=2000;
+  GPS.begin(9600);
+  GPS.sendCommand("$PMTK251,19200*22");
+  GPS.sendCommand("$PMTK220,100*2F");
+  mySerial.end();
+  GPS.begin(19200);
+  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCONLY);
+  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);
+  GPS.sendCommand(PGCMD_NOANTENNA);
+  delay(1000);
+  mySerial.println(PMTK_Q_RELEASE);
   //Motor A e B = Frente / Trás e Mudança de Direção 
   pinMode(MA_IN1,OUTPUT);
   pinMode(MA_IN2,OUTPUT);
@@ -64,16 +83,19 @@ void setup()
   pinMode(MD_EN4,OUTPUT);  
   
   Serial.begin(9600);
-  //apc220R.begin(9600);
+  Serial1.begin(9600);
   apc220T.begin(9600);
   bme.begin();
   sensors.begin();
+  delay(500);
+  
 }
 
 void loop() {
-  while(Serial.available())
+  /*verifica se chegaram comandos*/
+  while(Serial1.available())
   {
-    char c = Serial.read();
+    char c = Serial1.read();
     if(c != '\n')
     {
       data = data + c;
@@ -81,7 +103,7 @@ void loop() {
     else
     { 
       char v = data.charAt(0);
-      //Serial.println(v);
+      Serial.println(v);
         switch (v) {
           case 'F' : {
             digitalWrite(MA_IN1,HIGH);
@@ -176,15 +198,25 @@ void loop() {
       data="";
     }
   }
+
+  /*recolhe leituras dos sensors*/
+  
   sensors.requestTemperatures(); 
   tempH2O = sensors.getTempCByIndex(0);
   tempAr = bme.readTemperature();
   pressAr = bme.readPressure() / 100.0F;
   humidAr = bme.readHumidity();
+  getGPS();
+
+  
   unsigned long currentMillis = millis();
   if(currentMillis - previousMillis >= interval){
     previousMillis = currentMillis;
-    if(tempH2O != DEVICE_DISCONNECTED_C) {
+    String data = 
+    "ART;"+(String)tempH2O+";"+(String)tempAr+";"+(String)pressAr+";"+(String)humidAr+";"+(String)dec_lat+";"+(String)dec_lon;
+    apc220T.println(data);
+    Serial.println(data);
+    /*if(tempH2O != DEVICE_DISCONNECTED_C) {
       String data = (String)tempH2O + ";" + (String)tempAr + ";" + (String)pressAr + ";" + (String)humidAr;
       apc220T.println(data);
       Serial.println(data);
@@ -192,6 +224,53 @@ void loop() {
     else{
       apc220T.println("Erro sensor");
       Serial.println("Erro sensor");
+    }*/
+  }
+}
+//end loop
+
+void getGPS (){
+  if (!usingInterrupt)
+  {
+   while (mySerial.available())
+    {
+      char c = GPS.read();
+    }
+  }
+  if (GPS.newNMEAreceived()) {
+    if (!GPS.parse(GPS.lastNMEA()))
+      return;
+  }
+  if (timer > millis())  
+    timer = millis();
+  if (millis() - timer > rate) 
+  {
+    timer = millis();
+    if (GPS.fix)
+    {
+      lat = GPS.latitude;
+      deg_lat = int (lat / 100);
+      minu_lat = int (lat - (deg_lat * 100));
+      sec_lat = ((float) (lat - int(lat))) * 60;
+      dec_lat = (float) deg_lat + (float) minu_lat / 60 + (float) sec_lat / 3600;
+      if (GPS.lat == 'S')
+      {
+        dec_lat = dec_lat * -1;
+      }
+      lon = GPS.longitude;
+      deg_lon = int (lon / 100);
+      minu_lon = int (lon - (deg_lon * 100));
+      sec_lon = ((float) (lon - int(lon))) * 60;
+      dec_lon = (float) deg_lon + (float) minu_lon / 60 + (float) sec_lon / 3600;
+      if (GPS.lon == 'W')
+      {
+        dec_lon = dec_lon * -1;
+      }
+    }
+    else
+    {
+      dec_lat = 0;
+      dec_lon = 0;
     }
   }
 }
