@@ -191,6 +191,7 @@ void loop() {
     } 
     else{
       apc220T.println("Erro sensor");
+      Serial.println("Erro sensor");
     }
   }
 }
