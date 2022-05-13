@@ -15,14 +15,17 @@ char sem_dados[]="Sem dados";
 
 unsigned long previousMillis = 0;
 unsigned long currentMillis = 0;
+unsigned long count=0;
 const long interval = 100;
 String temp = "";
+
 
 void setup() 
 {
   Serial.begin(9600);
   pinMode(4, INPUT);
   digitalWrite(4, HIGH);
+  pinMode(5, INPUT);
   apc220T.begin(9600);
   apc220R.begin(9600);
   lcd.begin(16,2);
@@ -56,6 +59,9 @@ void limpaLinha(int linha){
 
 void loop() 
 {
+  if(digitalRead(5)==HIGH){
+    count=0;
+  }
   currentMillis = millis();
   if (currentMillis - previousMillis >= interval)
   {
@@ -166,14 +172,18 @@ void loop()
     char c = apc220R.read();
     if(c!='\n'){
       temp = temp + c;
-      lcd.setCursor(1,1);
-      lcd.print("Recebendo dados");
+      //lcd.setCursor(1,1);
+      //lcd.print("Recebendo dados");
     }
     else {
       Serial.println(temp);
       limpaLinha(1);
-      lcd.setCursor(4,1);
-      lcd.print("Sem dados");
+      lcd.setCursor(0,1);
+      //lcd.print("Sem dados");
+      count++;
+      lcd.print("A receber:");
+      lcd.setCursor(10,1);
+      lcd.print(count);
       }
       
     }
