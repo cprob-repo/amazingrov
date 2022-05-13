@@ -15,7 +15,7 @@ char sem_dados[]="Sem dados";
 
 unsigned long previousMillis = 0;
 unsigned long currentMillis = 0;
-const long interval = 250;
+const long interval = 100;
 String temp = "";
 
 void setup() 
