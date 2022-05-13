@@ -36,7 +36,7 @@ float pressAr = 0;
 float humidAr = 0;
 
 unsigned long previousMillis = 0;
-const long interval = 1000;
+const long interval = 2000;
 
 Adafruit_BME280 bme;
 SoftwareSerial apc220T(2,4);
@@ -213,8 +213,11 @@ void loop() {
   if(currentMillis - previousMillis >= interval){
     previousMillis = currentMillis;
     String data = 
-    "ART;"+(String)tempH2O+";"+(String)tempAr+";"+(String)pressAr+";"+(String)humidAr+";"+(String)dec_lat+";"+(String)dec_lon;
-    apc220T.println(data);
+    "ART;"+(String)tempH2O+";"+(String)tempAr+";"+(String)pressAr+";"+(String)humidAr+";";
+    apc220T.print(data);
+    apc220T.print(dec_lat,8);
+    apc220T.print(";");
+    apc220T.println(dec_lon,8);
     Serial.println(data);
     /*if(tempH2O != DEVICE_DISCONNECTED_C) {
       String data = (String)tempH2O + ";" + (String)tempAr + ";" + (String)pressAr + ";" + (String)humidAr;
